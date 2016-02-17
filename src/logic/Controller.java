@@ -23,6 +23,10 @@ public class Controller {
 	
 	public void userConnected(Socket currConnection){
 		view.addText("User connected from: "+currConnection.getInetAddress()+" with hellostring: "); // TEST
+		User currUser = new User(this, currConnection);
+		gd.addUser(currUser);
+		Thread userTh = new Thread(currUser);
+		userTh.start();
 	}
 	
 	
