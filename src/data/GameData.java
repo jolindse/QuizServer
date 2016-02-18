@@ -21,7 +21,6 @@ public class GameData {
 	
 	public void sendToAll(String message){
 		for(User currUser: connectedUsers){
-			System.out.println(currUser.getName()+" borde broadcastas.");
 			currUser.send(message);
 		}
 	}

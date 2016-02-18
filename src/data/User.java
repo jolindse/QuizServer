@@ -1,6 +1,5 @@
 package data;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -13,29 +12,22 @@ public class User implements Runnable {
 	private String name;
 	private Socket client;
 	private Controller controller;
-	private BufferedWriter out;
+	private PrintWriter out;
 	private InputParser ip;
 
 	public User(Controller controller, Socket client) {
 		this.controller = controller;
 		this.client = client;
-		name = "Anonymous";
 		ip = new InputParser(this);
 		try {
-			out = new BufferedWriter(new PrintWriter(client.getOutputStream()));
+			out = new PrintWriter(client.getOutputStream(),true);
 		} catch (IOException e) {
 			controller.outputText("Problem sending to client!");
 		}
 	}
 
 	public void send(String text) {
-		try {
-			out.write(text + "\n");
-			out.flush();
-		} catch (IOException e) {
-			controller.outputText("Problem sending to client!");
-		}
-
+		out.println(text);
 	}
 
 	@Override
@@ -44,8 +36,7 @@ public class User implements Runnable {
 		try {
 			Scanner sc = new Scanner(client.getInputStream());
 			while (sc.hasNextLine()) {
-				lineIn = sc.nextLine();
-				ip.parse(lineIn);
+				ip.parse(sc.nextLine());
 			}
 		} catch (IOException e) {
 			controller.outputText("Problem reading from client!");
@@ -61,7 +52,7 @@ public class User implements Runnable {
 
 	public void connect(String name, String message) {
 		this.name = name;
-		controller.outputText("User " + name + " connected with message: " + message);
+		controller.announceConnection(name);
 	}
 
 	public void setName(String name) {

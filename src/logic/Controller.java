@@ -29,14 +29,20 @@ public class Controller {
 		userTh.start();
 	}
 	
+	public void announceConnection(String name){
+		outputText("User "+name+" connected to gameserver!");
+		view.addConnectedUser(name);
+	}
+	
 	public void disconnect(User currUser){
-		view.addText(currUser.getName()+" disconnected from server.");
+		String message = currUser.getName()+" disconnected from server."; 
+		view.addText(message);
+		view.removeConnectedUser(currUser.getName());
+		gd.sendToAll(message);
 		gd.removeUser(currUser);
 	}
 	
-	
 	// METHODS TO MANIPULATE VIEW
-	
 	public void outputText(String text){
 		gd.sendToAll(text);
 		view.addText(text);

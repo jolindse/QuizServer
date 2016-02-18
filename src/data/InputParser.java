@@ -1,6 +1,5 @@
 package data;
 
-
 public class InputParser {
 
 	private User currUser;
@@ -11,8 +10,21 @@ public class InputParser {
 		this.currUser = currUser;
 	}
 	
+	/**
+	 * Takes input string and parses for commands.
+	 * 
+	 * Commands accepted:
+	 * 
+	 * NAME, name
+	 * CONNECT name, optional connect message
+	 * CHAT,,message
+	 * DISCONNECT ,,
+	 * 
+	 * @param inputString
+	 */
 	public void parse(String inputString){
-		String[] splitString = inputString.split(splitChars);
+		// Had to add -1 to prevent split from stripping if empty string.
+		String[] splitString = inputString.split(splitChars,-1);
 		String cmd = null;
 		String cmdData = null;
 		String optionalData = null;
@@ -20,7 +32,7 @@ public class InputParser {
 		cmd = splitString[0];
 		cmdData = splitString[1];
 		optionalData = splitString[2];
-		
+
 		switch(cmd){
 		case "NAME":
 			currUser.setName(cmdData);
