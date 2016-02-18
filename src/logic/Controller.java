@@ -22,17 +22,23 @@ public class Controller {
 	// GAMEDATA METHODS
 	
 	public void userConnected(Socket currConnection){
-		view.addText("User connected from: "+currConnection.getInetAddress()+" with hellostring: "); // TEST
+		view.addText("User connected from: "+currConnection.getInetAddress()); 
 		User currUser = new User(this, currConnection);
 		gd.addUser(currUser);
 		Thread userTh = new Thread(currUser);
 		userTh.start();
 	}
 	
+	public void disconnect(User currUser){
+		view.addText(currUser.getName()+" disconnected from server.");
+		gd.removeUser(currUser);
+	}
+	
 	
 	// METHODS TO MANIPULATE VIEW
 	
 	public void outputText(String text){
+		gd.sendToAll(text);
 		view.addText(text);
 	}
 

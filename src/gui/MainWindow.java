@@ -2,6 +2,8 @@ package gui;
 
 
 
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -9,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class MainWindow {
 
@@ -34,6 +37,13 @@ public class MainWindow {
 		
 		rootPane.setTop(buttonPanel);
 		rootPane.setCenter(outputPanel);
+		
+		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				System.exit(0);
+			}
+		});
 		
 		stage.setTitle("QuizServer v0.1");
 		stage.setScene(scene);
