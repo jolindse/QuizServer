@@ -24,4 +24,8 @@ public class GameData {
 			currUser.send(message);
 		}
 	}
+	
+	public int getNumClients(){
+		return connectedUsers.size();
+	}
 }

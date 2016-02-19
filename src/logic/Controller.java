@@ -9,10 +9,12 @@ import gui.MainWindow;
 
 public class Controller {
 
-	List<User> connectedUsers;
-	MainWindow view;
-	GameData gd;
-	
+	private List<User> connectedUsers;
+	private MainWindow view;
+	private GameData gd;
+	private boolean newmessage = false;
+	private String message;
+	private int clientsSent = 0;
 	
 	public Controller(MainWindow view){
 		this.view = view;
@@ -21,7 +23,7 @@ public class Controller {
 	
 	// GAMEDATA METHODS
 	
-	public void userConnected(Socket currConnection){
+	public synchronized void userConnected(Socket currConnection){
 		view.addText("User connected from: "+currConnection.getInetAddress()); 
 		User currUser = new User(this, currConnection);
 		gd.addUser(currUser);
@@ -29,24 +31,45 @@ public class Controller {
 		userTh.start();
 	}
 	
-	public void announceConnection(String name){
+	public synchronized void announceConnection(String name){
 		outputText("User "+name+" connected to gameserver!");
 		view.addConnectedUser(name);
 	}
 	
-	public void disconnect(User currUser){
+	public synchronized void disconnect(User currUser){
 		String message = currUser.getName()+" disconnected from server."; 
 		view.addText(message);
 		view.removeConnectedUser(currUser.getName());
-		gd.sendToAll(message);
+		setMessage(message);
 		gd.removeUser(currUser);
 	}
 	
 	// METHODS TO MANIPULATE VIEW
-	public void outputText(String text){
-		gd.sendToAll(text);
+	public synchronized void outputText(String text){
+		setMessage(text);
 		view.addText(text);
 	}
 
+	// MESSAGE METHODS
 	
+	public boolean hasMessage(){
+		return newmessage;
+	}
+	
+	public String getMessage(){
+		return message;
+	}
+	
+	public void setMessage(String message){
+		this.message = message;
+		newmessage = true;
+	}
+	
+	public synchronized void messageSent(){
+		clientsSent++;
+		if (gd.getNumClients() == clientsSent){
+			newmessage = false;
+			clientsSent = 0;
+		}
+	}
 }

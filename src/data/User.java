@@ -1,9 +1,10 @@
 package data;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 import logic.Controller;
 
@@ -20,7 +21,7 @@ public class User implements Runnable {
 		this.client = client;
 		ip = new InputParser(this);
 		try {
-			out = new PrintWriter(client.getOutputStream(),true);
+			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
 			controller.outputText("Problem sending to client!");
 		}
@@ -32,16 +33,27 @@ public class User implements Runnable {
 
 	@Override
 	public void run() {
-		String lineIn;
 		try {
-			Scanner sc = new Scanner(client.getInputStream());
-			while (sc.hasNextLine()) {
-				ip.parse(sc.nextLine());
-			}
-		} catch (IOException e) {
-			controller.outputText("Problem reading from client!");
-		}
+		BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+		String lastMessage = "";
 
+			while (true) {
+				if (in.ready()) {
+					ip.parse(in.readLine());
+				}
+
+				if (controller.hasMessage()) {
+					if (!(lastMessage.equals(controller.getMessage()))) {
+						lastMessage = controller.getMessage();
+						send(lastMessage);
+						controller.messageSent();
+					}
+				}
+				Thread.sleep(100);
+			}
+		} catch (IOException | InterruptedException e) {
+			controller.outputText("Error communicating with client!");
+		}
 	}
 
 	public String getName() {
