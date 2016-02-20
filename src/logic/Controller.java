@@ -26,6 +26,7 @@ public class Controller {
 	public void registerView(MainWindow view){
 		this.view = view;
 	}
+	
 	// GAMEDATA METHODS
 
 	public synchronized void userConnected(Socket currConnection) {
@@ -47,7 +48,6 @@ public class Controller {
 		view.removeConnectedUser(currUser.getName());
 		gd.removeUser(currUser);
 		if (gd.getNumClients() > 0) {
-			System.out.println("CONTROLLER; Clients still connected should send disconnect"); // TEST
 			setMessage(currMessage.getSendString());
 		}
 	}
@@ -58,16 +58,20 @@ public class Controller {
 	}
 
 	// METHODS TO MANIPULATE VIEW
+
 	public synchronized void outputText(Message currMessage) {
 		setMessage(currMessage.getSendString());
 		view.output(currMessage);
 	}
 
 	public synchronized void outputChat(Message currMessage) {
+		System.out.println("CONTROLLER; CHAT-OUTPUT; Should send chat message: "+currMessage.getSendString()); // TEST
 		setMessage(currMessage.getSendString());
 		view.output(currMessage);
 		if (quizActive) {
-			quiz.checkAnswer(currMessage.getOptionalData());
+			if(quiz.checkAnswer(currMessage.getOptionalData())){
+				outputText(makeMessage("QUIZ", "CORRECT", "CORRECT ANSWER! "+currMessage.getCmdData()+" guessed (or knew) right!"));
+			}
 		}
 	}
 
@@ -78,6 +82,7 @@ public class Controller {
 	public synchronized void outputInfo(String info) {
 		view.output(new Message("INFO", "", info));
 	}
+	
 	// BROADCAST METHODS
 
 	public boolean hasMessage() {
@@ -89,15 +94,16 @@ public class Controller {
 	}
 
 	public void setMessage(String message) {
-		System.out.println("CONTROLLER; New message recieved: " + message); // TEST
+		System.out.println("CONTROLLER; MESSAGE SET; New message recieved: " + message); // TEST
 		this.message = message;
 		newmessage = true;
 	}
 
 	public synchronized void messageSent() {
 		clientsSent++;
+		System.out.println("CONTROLLER; MESSAGE SENT; client reported sent"); // TEST
 		if (gd.getNumClients() == clientsSent) {
-			System.out.println("CONTROLLER; Message reported sent to all clients. (" + clientsSent + "/"
+			System.out.println("CONTROLLER; MESSAGE SENT; Message reported sent to all clients. (" + clientsSent + "/"
 					+ gd.getNumClients() + ")"); // TEST
 			newmessage = false;
 			clientsSent = 0;

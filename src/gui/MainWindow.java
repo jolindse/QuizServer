@@ -41,7 +41,6 @@ public class MainWindow {
 
 		Button btnStart = new Button("Start quiz");
 		btnStart.setOnAction((e) -> {
-			System.out.println("VIEW; register buttonclick!"); // TEST
 			controller.startQuiz();
 		});
 		Button btnStop = new Button("Unused");

@@ -21,10 +21,8 @@ public class Quiz implements Runnable {
 
 	public Quiz(Controller controller) {
 		this.controller = controller;
-		System.out.println("QUIZ; Entered constructor!"); // TEST
 		quizQuestions = new ArrayList<>();
 		makeQuestionsList(questionFile);
-		System.out.println("QUIZ; Made questions list"); // TEST
 	}
 
 	@Override
@@ -35,6 +33,18 @@ public class Quiz implements Runnable {
 			newQuestion();
 			long timeStart = (System.currentTimeMillis())+(30*1000);
 			while(!questionAnswered && timeStart > System.currentTimeMillis()){
+				if (questionAnswered){
+					try {
+						System.out.println("QUIZ; Should sleep 1 second."); // TEST
+						Thread.sleep(1000);
+						System.out.println("QUIZ; Should print additional info"); // TEST
+						controller.outputText(new Message("QUIZ","Info",currQuestion.getInfo()));
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -47,7 +57,6 @@ public class Quiz implements Runnable {
 	}
 
 	public synchronized boolean checkAnswer(String answer) {
-		System.out.println("QUIZ; Checkanswer started"); // TEST
 		boolean result = false;
 		if (!questionAnswered) {
 			System.out.println("QUIZ; Deemed question not answered. Answer string: "+answer+" correct answer: "+currQuestion.getAnswer()); // TEST
@@ -72,7 +81,6 @@ public class Quiz implements Runnable {
 		String currLine;
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			while ((currLine = reader.readLine()).length() > 0) {
-				System.out.println("QUIZ; Current readline: "+currLine); // TEST
 				String[] split = currLine.split(separator, -1);
 				Question question = new Question(split[0], split[1], split[2]);
 				quizQuestions.add(question);
