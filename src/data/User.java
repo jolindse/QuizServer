@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import bean.Message;
 import logic.Controller;
 
 public class User implements Runnable {
@@ -14,16 +15,14 @@ public class User implements Runnable {
 	private Socket client;
 	private Controller controller;
 	private PrintWriter out;
-	private InputParser ip;
 
 	public User(Controller controller, Socket client) {
 		this.controller = controller;
 		this.client = client;
-		ip = new InputParser(this);
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
-			controller.outputText("Problem sending to client!");
+			controller.outputError(name+" problem sending to client!");
 		}
 	}
 
@@ -34,12 +33,15 @@ public class User implements Runnable {
 	@Override
 	public void run() {
 		try {
-		BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		String lastMessage = "";
+			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			Message currMessage;
+			String lastMessage = "";
 
 			while (true) {
 				if (in.ready()) {
-					ip.parse(in.readLine());
+					currMessage = new Message(in.readLine());
+					System.out.println("Message recieved: "+currMessage.getSendString()); // TEST
+					parse(currMessage);
 				}
 
 				if (controller.hasMessage()) {
@@ -52,7 +54,7 @@ public class User implements Runnable {
 				Thread.sleep(100);
 			}
 		} catch (IOException | InterruptedException e) {
-			controller.outputText("Error communicating with client!");
+			controller.outputError(name + " error communicating with client!");
 		}
 	}
 
@@ -62,26 +64,32 @@ public class User implements Runnable {
 
 	// METHODS FROM PARSED INPUTDATA
 
-	public void connect(String name, String message) {
-		this.name = name;
-		controller.announceConnection(name);
-	}
-
-	public void setName(String name) {
-		this.name = name;
-		controller.outputText("Changed name to: " + name);
-	}
-
-	public void chat(String message) {
-		controller.outputText(name + " says: " + message);
-	}
-
-	public void disconnect() {
-		controller.disconnect(this);
-		try {
-			client.close();
-		} catch (IOException e) {
-			controller.outputText("Error closing " + name + "s socket.");
+	private void parse(Message currMessage) {
+		switch (currMessage.getCmd()) {
+		case "NAME":
+			name = currMessage.getCmdData();
+			controller.outputText(currMessage);
+			break;
+		case "CHAT":
+			controller.outputText(new Message(currMessage.getCmd(),name,currMessage.getOptionalData()));
+			break;
+		case "CONNECT":
+			name = currMessage.getCmdData();
+			controller.addUser(name);
+			controller.outputText(currMessage);
+			break;
+		case "DISCONNECT":
+			controller.disconnect(this);
+			try {
+				client.close();
+			} catch (IOException e) {
+				controller.outputError(name + " error closing socket.");
+			}
+			break;
+		default:
+			controller.outputText(currMessage);
+			break;
 		}
 	}
+
 }

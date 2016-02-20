@@ -18,7 +18,7 @@ public class NetworkListner extends Thread {
 	public void run() {
 		try {
 			server = new ServerSocket(PORT);
-			controller.outputText("Server up and listening to port "+server.getLocalPort());
+			controller.outputInfo("Server up and listening to port "+server.getLocalPort());
 			while(true){
 				Socket connection = server.accept();
 				controller.userConnected(connection);

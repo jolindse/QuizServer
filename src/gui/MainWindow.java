@@ -5,6 +5,7 @@ package gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import bean.Message;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -17,15 +18,12 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class MainWindow {
 
 	private BorderPane rootPane;
-	// private Button btnStart, btnStop;
-	
 	private List<String> usersConnected;
 	private ListProperty<String> userListProperty;
 	private TextArea outputField;
@@ -34,16 +32,12 @@ public class MainWindow {
 		BorderPane rootPane = new BorderPane();
 		Scene scene = new Scene(rootPane, 600, 200);
 		
-		
 		// Setting listview with connected users
 		usersConnected = new ArrayList<>();
 		userListProperty = new SimpleListProperty<>();
 		userListProperty.set(FXCollections.observableArrayList(usersConnected));
-		
 		ListView<String> users = new ListView<String>();
 		users.itemsProperty().bind(userListProperty);
-		
-		
 		
 		Button btnStart = new Button("Start server");
 		Button btnStop = new Button("Stop server");
@@ -58,7 +52,6 @@ public class MainWindow {
 		
 		rootPane.setTop(buttonPanel);
 		rootPane.setCenter(outputPanel);
-		
 		
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
@@ -89,7 +82,7 @@ public class MainWindow {
 		});
 	}
 	
-	public void addText(String text){
-		outputField.appendText(text+"\n");
+	public void output(Message currMessage){
+		outputField.appendText("["+currMessage.getCmd()+"] "+currMessage.getCmdData()+" : "+currMessage.getOptionalData()+"\n");
 	}
 }

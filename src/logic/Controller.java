@@ -3,6 +3,7 @@ package logic;
 import java.net.Socket;
 import java.util.List;
 
+import bean.Message;
 import data.GameData;
 import data.User;
 import gui.MainWindow;
@@ -15,59 +16,77 @@ public class Controller {
 	private boolean newmessage = false;
 	private String message;
 	private int clientsSent = 0;
-	
-	public Controller(MainWindow view){
+
+	public Controller(MainWindow view) {
 		this.view = view;
 		gd = new GameData();
 	}
-	
+
 	// GAMEDATA METHODS
-	
-	public synchronized void userConnected(Socket currConnection){
-		view.addText("User connected from: "+currConnection.getInetAddress()); 
+
+	public synchronized void userConnected(Socket currConnection) {
 		User currUser = new User(this, currConnection);
 		gd.addUser(currUser);
 		Thread userTh = new Thread(currUser);
 		userTh.start();
-	}
-	
-	public synchronized void announceConnection(String name){
-		outputText("User "+name+" connected to gameserver!");
-		view.addConnectedUser(name);
-	}
-	
-	public synchronized void disconnect(User currUser){
-		String message = currUser.getName()+" disconnected from server."; 
-		view.addText(message);
-		view.removeConnectedUser(currUser.getName());
-		setMessage(message);
-		gd.removeUser(currUser);
-	}
-	
-	// METHODS TO MANIPULATE VIEW
-	public synchronized void outputText(String text){
-		setMessage(text);
-		view.addText(text);
+		Message currMessage = makeMessage("CONNECT", "", "User connected from: " + currConnection.getInetAddress());
+		view.output(currMessage);
 	}
 
-	// MESSAGE METHODS
-	
-	public boolean hasMessage(){
+	public synchronized void addUser(String name) {
+		view.addConnectedUser(name);
+	}
+
+	public synchronized void disconnect(User currUser) {
+		Message currMessage = makeMessage("DISCONNECT", currUser.getName(), " disconnected from server.");
+		view.output(currMessage);
+		view.removeConnectedUser(currUser.getName());
+		gd.removeUser(currUser);
+		if (gd.getNumClients() > 0) {
+			System.out.println("CONTROLLER; Clients still connected should send disconnect"); // TEST
+			setMessage(currMessage.getSendString());
+		}
+	}
+
+	private Message makeMessage(String cmd, String cmdData, String optionalData) {
+		Message currMessage = new Message(cmd, cmdData, optionalData);
+		return currMessage;
+	}
+
+	// METHODS TO MANIPULATE VIEW
+	public synchronized void outputText(Message currMessage) {
+		setMessage(currMessage.getSendString());
+		view.output(currMessage);
+	}
+
+	public synchronized void outputError(String error) {
+		view.output(new Message("ERROR", "", error));
+	}
+
+	public synchronized void outputInfo(String info) {
+		view.output(new Message("INFO", "", info));
+	}
+	// BROADCAST METHODS
+
+	public boolean hasMessage() {
 		return newmessage;
 	}
-	
-	public String getMessage(){
+
+	public String getMessage() {
 		return message;
 	}
-	
-	public void setMessage(String message){
+
+	public void setMessage(String message) {
+		System.out.println("CONTROLLER; New message recieved: " + message); // TEST
 		this.message = message;
 		newmessage = true;
 	}
-	
-	public synchronized void messageSent(){
+
+	public synchronized void messageSent() {
 		clientsSent++;
-		if (gd.getNumClients() == clientsSent){
+		if (gd.getNumClients() == clientsSent) {
+			System.out.println("CONTROLLER; Message reported sent to all clients. (" + clientsSent + "/"
+					+ gd.getNumClients() + ")"); // TEST
 			newmessage = false;
 			clientsSent = 0;
 		}
