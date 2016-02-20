@@ -13,15 +13,19 @@ public class Controller {
 	private List<User> connectedUsers;
 	private MainWindow view;
 	private GameData gd;
+	private Quiz quiz;
 	private boolean newmessage = false;
+	private boolean quizActive = false;
 	private String message;
 	private int clientsSent = 0;
 
-	public Controller(MainWindow view) {
-		this.view = view;
+	public Controller() {
 		gd = new GameData();
 	}
 
+	public void registerView(MainWindow view){
+		this.view = view;
+	}
 	// GAMEDATA METHODS
 
 	public synchronized void userConnected(Socket currConnection) {
@@ -59,6 +63,14 @@ public class Controller {
 		view.output(currMessage);
 	}
 
+	public synchronized void outputChat(Message currMessage) {
+		setMessage(currMessage.getSendString());
+		view.output(currMessage);
+		if (quizActive) {
+			quiz.checkAnswer(currMessage.getOptionalData());
+		}
+	}
+
 	public synchronized void outputError(String error) {
 		view.output(new Message("ERROR", "", error));
 	}
@@ -90,5 +102,25 @@ public class Controller {
 			newmessage = false;
 			clientsSent = 0;
 		}
+	}
+
+	// QUIZ METHODS
+
+	public void startQuiz() {
+		if (!quizActive) {
+			quiz = new Quiz(this);
+			System.out.println("CONTROLLER; Quiz created: "+quiz); // TEST
+			Thread quizTh = new Thread(quiz);
+			quizTh.start();
+			System.out.println("CONTROLLER; Quiz thread started."); // TEST
+			quizActive = true;
+			Message currMessage = makeMessage("QUIZ", "Start", "New Quiz game started");
+			outputText(currMessage);
+		}
+		// START POINTS
+	}
+
+	public void endQuiz() {
+		quizActive = false;
 	}
 }

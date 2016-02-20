@@ -1,7 +1,5 @@
 package gui;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,69 +18,78 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import logic.Controller;
 
 public class MainWindow {
 
-	private BorderPane rootPane;
+	private Controller controller;
 	private List<String> usersConnected;
 	private ListProperty<String> userListProperty;
 	private TextArea outputField;
-	
-	public MainWindow(Stage stage){
+
+	public MainWindow(Stage stage, Controller controller) {
+		this.controller = controller;
 		BorderPane rootPane = new BorderPane();
 		Scene scene = new Scene(rootPane, 600, 200);
-		
+
 		// Setting listview with connected users
 		usersConnected = new ArrayList<>();
 		userListProperty = new SimpleListProperty<>();
 		userListProperty.set(FXCollections.observableArrayList(usersConnected));
 		ListView<String> users = new ListView<String>();
 		users.itemsProperty().bind(userListProperty);
-		
-		Button btnStart = new Button("Start server");
-		Button btnStop = new Button("Stop server");
+
+		Button btnStart = new Button("Start quiz");
+		btnStart.setOnAction((e) -> {
+			System.out.println("VIEW; register buttonclick!"); // TEST
+			controller.startQuiz();
+		});
+		Button btnStop = new Button("Unused");
 		TextField fieldPort = new TextField();
 		HBox buttonPanel = new HBox(10);
-		buttonPanel.getChildren().addAll(btnStart,btnStop, fieldPort);
+		buttonPanel.getChildren().addAll(btnStart, fieldPort, btnStop);
 
 		HBox outputPanel = new HBox();
 		outputField = new TextArea();
 		outputField.setEditable(false);
-		outputPanel.getChildren().addAll(outputField,users);
-		
+		outputPanel.getChildren().addAll(outputField, users);
+
 		rootPane.setTop(buttonPanel);
 		rootPane.setCenter(outputPanel);
-		
+
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {
 				System.exit(0);
 			}
 		});
-		
+
 		stage.setTitle("QuizServer v0.1");
 		stage.setScene(scene);
 		stage.show();
 	}
-	
+
 	// METHODS TO UPDATE GUI
-	
-	public void addConnectedUser(String name){
+
+	public void addConnectedUser(String name) {
 		usersConnected.add(name);
-		Platform.runLater(() ->{
-			userListProperty.set(FXCollections.observableArrayList(usersConnected));	
+		Platform.runLater(() -> {
+			userListProperty.set(FXCollections.observableArrayList(usersConnected));
 		});
-		
+
 	}
-	
-	public void removeConnectedUser(String name){
+
+	public void removeConnectedUser(String name) {
 		usersConnected.remove(name);
-		Platform.runLater(() ->{
-			userListProperty.set(FXCollections.observableArrayList(usersConnected));	
+		Platform.runLater(() -> {
+			userListProperty.set(FXCollections.observableArrayList(usersConnected));
 		});
 	}
-	
-	public void output(Message currMessage){
-		outputField.appendText("["+currMessage.getCmd()+"] "+currMessage.getCmdData()+" : "+currMessage.getOptionalData()+"\n");
+
+	public void output(Message currMessage) {
+		Platform.runLater(() -> {
+			outputField.appendText("[" + currMessage.getCmd() + "] " + currMessage.getCmdData() + " : "
+					+ currMessage.getOptionalData() + "\n");
+		});
 	}
 }

@@ -28,4 +28,10 @@ public class GameData {
 	public int getNumClients(){
 		return connectedUsers.size();
 	}
+	
+	// GAME METHODS
+	
+	public void newGame(){
+		
+	}
 }

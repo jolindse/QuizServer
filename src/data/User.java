@@ -71,7 +71,7 @@ public class User implements Runnable {
 			controller.outputText(currMessage);
 			break;
 		case "CHAT":
-			controller.outputText(new Message(currMessage.getCmd(),name,currMessage.getOptionalData()));
+			controller.outputChat(new Message(currMessage.getCmd(),name,currMessage.getOptionalData()));
 			break;
 		case "CONNECT":
 			name = currMessage.getCmdData();

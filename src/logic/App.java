@@ -14,8 +14,9 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		view = new MainWindow(primaryStage);
-		Controller controller = new Controller(view);
+		Controller controller = new Controller();
+		view = new MainWindow(primaryStage, controller);
+		controller.registerView(view);
 		Thread serverConnect = new NetworkListner(controller);
 		serverConnect.start();
 	}
