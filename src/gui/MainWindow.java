@@ -19,7 +19,15 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import logic.Controller;
-
+/**
+ * Server GUI class. Simple JavaFX application that shows the GUI.
+ * 
+ * All methods called from controller is scheduled to run in the FX-thread by using Platform.runlater to 
+ * avoid concurrency issues.
+ * 
+ * @author Johan Lindström (jolindse@hotmail.com)
+ *
+ */
 public class MainWindow {
 
 	private Controller controller;
@@ -32,17 +40,26 @@ public class MainWindow {
 		BorderPane rootPane = new BorderPane();
 		Scene scene = new Scene(rootPane, 600, 200);
 
-		// Setting listview with connected users
+		/**
+		 * Initializes the list view that shows the currently connected users names.
+		 */
 		usersConnected = new ArrayList<>();
 		userListProperty = new SimpleListProperty<>();
 		userListProperty.set(FXCollections.observableArrayList(usersConnected));
 		ListView<String> users = new ListView<String>();
 		users.itemsProperty().bind(userListProperty);
 
+		/**
+		 * The start quiz button. Calls the method in controller and starts a quiz.
+		 */
 		Button btnStart = new Button("Start quiz");
 		btnStart.setOnAction((e) -> {
 			controller.startQuiz();
 		});
+		
+		/** 
+		 * Currently unused.
+		 */
 		Button btnStop = new Button("Unused");
 		TextField fieldPort = new TextField();
 		HBox buttonPanel = new HBox(10);
@@ -59,6 +76,9 @@ public class MainWindow {
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {
+				/**
+				 * System exit closes all threads and connections.
+				 */
 				System.exit(0);
 			}
 		});
@@ -70,6 +90,10 @@ public class MainWindow {
 
 	// METHODS TO UPDATE GUI
 
+	/**
+	 * Adds a connected user to list view.
+	 * @param name
+	 */
 	public void addConnectedUser(String name) {
 		usersConnected.add(name);
 		Platform.runLater(() -> {
@@ -77,7 +101,11 @@ public class MainWindow {
 		});
 
 	}
-
+	
+	/**
+	 * Removes user from list view.
+	 * @param name
+	 */
 	public void removeConnectedUser(String name) {
 		usersConnected.remove(name);
 		Platform.runLater(() -> {
@@ -85,6 +113,10 @@ public class MainWindow {
 		});
 	}
 
+	/**
+	 * Outputs the current message to view with "debugging" formating. 
+	 * @param currMessage
+	 */
 	public void output(Message currMessage) {
 		Platform.runLater(() -> {
 			outputField.appendText("[" + currMessage.getCmd() + "] " + currMessage.getCmdData() + " : "

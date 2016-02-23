@@ -8,7 +8,14 @@ import java.net.Socket;
 
 import bean.Message;
 import logic.Controller;
-
+/**
+ * User/Client class
+ * 
+ * Each clients is an own instance of this class and by that runs in it's own thread.
+ * 
+ * @author Johan Lindström (jolindse@hotmail.com)
+ *
+ */
 public class User implements Runnable {
 
 	private String name;
@@ -16,6 +23,11 @@ public class User implements Runnable {
 	private Controller controller;
 	private PrintWriter out;
 
+	/**
+	 * Initializes the instance and sets handlers and opens the output writer
+	 * @param controller
+	 * @param client
+	 */
 	public User(Controller controller, Socket client) {
 		this.controller = controller;
 		this.client = client;
@@ -25,11 +37,19 @@ public class User implements Runnable {
 			controller.outputError(name+" problem sending to client!");
 		}
 	}
-
+	
+	/**
+	 * Send the formatted string to client.
+	 * @param text
+	 */
 	public void send(String text) {
 		out.println(text);
 	}
 
+	/**
+	 * Socket listener thread. Handles incoming traffic from client and checks if theres a broadcast message to be delivered to 
+	 * the client. Sleeps for 100ns each run to save CPU-cycles. 
+	 */
 	@Override
 	public void run() {
 		try {
@@ -57,13 +77,20 @@ public class User implements Runnable {
 			controller.outputError(name + " error communicating with client!");
 		}
 	}
-
+	
+	/**
+	 *  Returns client name info.
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
 
-	// METHODS FROM PARSED INPUTDATA
-
+	
+	/**
+	 * Parses the cmd part of the incomming message from the client and calls the appropriate function in the controller.
+	 * @param currMessage
+	 */
 	private void parse(Message currMessage) {
 		switch (currMessage.getCmd()) {
 		case "NAME":

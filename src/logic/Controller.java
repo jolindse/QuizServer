@@ -1,19 +1,29 @@
 package logic;
 
 import java.net.Socket;
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 
 import bean.Message;
 import data.GameData;
 import data.User;
 import gui.MainWindow;
 
+/**
+ *  Main logic class.
+ *  
+ *  Application wide flows are being routed to this class.
+ *  
+ */
 public class Controller {
 
 	private List<User> connectedUsers;
+	private Queue<String> messageQueue;
 	private MainWindow view;
 	private GameData gd;
 	private Quiz quiz;
+	private boolean broadcastInProgress = false;
 	private boolean newmessage = false;
 	private boolean quizActive = false;
 	private String message;
@@ -21,14 +31,24 @@ public class Controller {
 
 	public Controller() {
 		gd = new GameData();
-	}
+		messageQueue = new ArrayDeque<>(); 	
+		}
 
+	/**
+	 * Used to set the view reference for further view-manipulation.
+	 * @param view
+	 */
 	public void registerView(MainWindow view){
 		this.view = view;
 	}
 	
 	// GAMEDATA METHODS
 
+	/**
+	 * Ran when a connect message has been recieved on a socket.
+	 * Instanciates a corresponding User-object and adds the user to the GameData clients list.
+	 * @param currConnection
+	 */
 	public synchronized void userConnected(Socket currConnection) {
 		User currUser = new User(this, currConnection);
 		gd.addUser(currUser);
@@ -38,10 +58,18 @@ public class Controller {
 		view.output(currMessage);
 	}
 
+	/**
+	 * Adds the user to the view list.
+	 * @param name
+	 */
 	public synchronized void addUser(String name) {
 		view.addConnectedUser(name);
 	}
 
+	/**
+	 * Runs when a disconnect has been recieved. Announces, removes user from client list and view list. 
+	 * @param currUser
+	 */
 	public synchronized void disconnect(User currUser) {
 		Message currMessage = makeMessage("DISCONNECT", currUser.getName(), " disconnected from server.");
 		view.output(currMessage);
@@ -51,7 +79,14 @@ public class Controller {
 			setMessage(currMessage.getSendString());
 		}
 	}
-
+	
+	/**
+	 *  Internal method to make a message object for broadcasting from within controller class.
+	 * @param cmd
+	 * @param cmdData
+	 * @param optionalData
+	 * @return
+	 */
 	private Message makeMessage(String cmd, String cmdData, String optionalData) {
 		Message currMessage = new Message(cmd, cmdData, optionalData);
 		return currMessage;
@@ -59,59 +94,112 @@ public class Controller {
 
 	// METHODS TO MANIPULATE VIEW
 
+	/**
+	 * Default output method to update view and broadcast to connected clients.
+	 * @param currMessage
+	 */
 	public synchronized void outputText(Message currMessage) {
 		setMessage(currMessage.getSendString());
 		view.output(currMessage);
 	}
 
+	/**
+	 * Chat output that checks if a quiz game is active and if thats the case checks chat message as potential answer.
+	 * @param currMessage
+	 */
 	public synchronized void outputChat(Message currMessage) {
 		System.out.println("CONTROLLER; CHAT-OUTPUT; Should send chat message: "+currMessage.getSendString()); // TEST
 		setMessage(currMessage.getSendString());
 		view.output(currMessage);
 		if (quizActive) {
-			if(quiz.checkAnswer(currMessage.getOptionalData())){
-				outputText(makeMessage("QUIZ", "CORRECT", "CORRECT ANSWER! "+currMessage.getCmdData()+" guessed (or knew) right!"));
-			}
+			checkAnswer(currMessage);
 		}
 	}
 
+	/**
+	 * Error output that makes a message for view.
+	 * @param error
+	 */
 	public synchronized void outputError(String error) {
 		view.output(new Message("ERROR", "", error));
 	}
 
+	/**
+	 * Info output that makes a message for view.
+	 * @param info
+	 */
 	public synchronized void outputInfo(String info) {
 		view.output(new Message("INFO", "", info));
 	}
 	
 	// BROADCAST METHODS
 
+	/**
+	 * Returns if theres a message to broadcast.
+	 * @return
+	 */
 	public boolean hasMessage() {
 		return newmessage;
 	}
 
+	/**
+	 * Returns the message for broadcast.
+	 * @return
+	 */
 	public String getMessage() {
 		return message;
 	}
 
-	public void setMessage(String message) {
+	/**
+	 * Adds a message to broadcast. If theres allready a broadcast active it adds it to the broadcast queue.
+	 * @param message
+	 */
+	private void setMessage(String message) {
 		System.out.println("CONTROLLER; MESSAGE SET; New message recieved: " + message); // TEST
-		this.message = message;
-		newmessage = true;
+		if (!broadcastInProgress){
+			this.message = message;
+			newmessage = true;
+			broadcastInProgress = true;
+		} else {
+			System.out.println("CONTROLLER; Added message to queue: "+message); // TEST
+			messageQueue.offer(message);
+		}
+	}
+	
+	/**
+	 * Checks if there are broadcast messages in queue and if thats the case broadcast the next message in queue.
+	 */
+	private void checkMessageQueue(){
+		if (!messageQueue.isEmpty()){
+			System.out.println("CONTROLLER; Message in queue detected. Should init new message routine"); // TEST
+			message = messageQueue.poll();
+			newmessage = true;
+			broadcastInProgress = true;
+		}
 	}
 
+	/**
+	 * Method called by each client when they have broadcasted the message to it's socket. Makes sure all clients have gotten
+	 * the message then checks if theres another message to be broadcasted. 
+	 */
 	public synchronized void messageSent() {
 		clientsSent++;
 		System.out.println("CONTROLLER; MESSAGE SENT; client reported sent"); // TEST
-		if (gd.getNumClients() == clientsSent) {
+		if (gd.getNumClients() <= clientsSent) {
 			System.out.println("CONTROLLER; MESSAGE SENT; Message reported sent to all clients. (" + clientsSent + "/"
 					+ gd.getNumClients() + ")"); // TEST
 			newmessage = false;
+			broadcastInProgress = false;
 			clientsSent = 0;
+			checkMessageQueue();
 		}
 	}
 
 	// QUIZ METHODS
 
+	/**
+	 * Starts a new quiz. Spawns the quiz in a new thread. 
+	 */
 	public void startQuiz() {
 		if (!quizActive) {
 			quiz = new Quiz(this);
@@ -120,13 +208,22 @@ public class Controller {
 			quizTh.start();
 			System.out.println("CONTROLLER; Quiz thread started."); // TEST
 			quizActive = true;
-			Message currMessage = makeMessage("QUIZ", "Start", "New Quiz game started");
-			outputText(currMessage);
+			outputText(makeMessage("QUIZ", "START", "New Quiz game started"));
 		}
 		// START POINTS
 	}
 
+	private void checkAnswer(Message currMessage) {
+		if(quiz.checkAnswer(currMessage.getOptionalData())){
+			outputText(makeMessage("QUIZ", "ANSWER", "CORRECT ANSWER! "+currMessage.getCmdData()+" guessed (or knew) right!"));
+		}
+	}
+	
+	/**
+	 * Method ran after quiz has ended.
+	 */
 	public void endQuiz() {
+		outputText(makeMessage("QUIZ", "ENDED", "Quiz game ended. Should be more info here."));
 		quizActive = false;
 	}
 }

@@ -12,6 +12,13 @@ public class App extends Application {
 		launch(args);
 	}
 
+	/**
+	 *  In order to get the view reference with the controller for
+	 *  later view-manipulation the reference is being passed right after the view is started.
+	 *  
+	 *  Except starting the FX-thread it also starts a thread for server network operations in order
+	 *  to not interfer with the view-thread.
+	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		Controller controller = new Controller();

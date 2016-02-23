@@ -9,7 +9,11 @@ import java.util.Random;
 
 import bean.Message;
 import bean.Question;
-
+/**
+ * Quiz class. Handles game logic and outputs the questions in random order.
+ * @author Johan Lindström (jolindse@hotmail.com)
+ *
+ */
 public class Quiz implements Runnable {
 
 	private Controller controller;
@@ -27,35 +31,42 @@ public class Quiz implements Runnable {
 
 	@Override
 	public void run() {
-		
-		// Start quiz
 		while (!quizDone) {
 			newQuestion();
 			long timeStart = (System.currentTimeMillis())+(30*1000);
 			while(!questionAnswered && timeStart > System.currentTimeMillis()){
-				if (questionAnswered){
-					try {
-						System.out.println("QUIZ; Should sleep 1 second."); // TEST
-						Thread.sleep(1000);
-						System.out.println("QUIZ; Should print additional info"); // TEST
-						controller.outputText(new Message("QUIZ","Info",currQuestion.getInfo()));
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+			// "Timer"-function. Adds 30 seconds to the current time.
 			try {
 				Thread.sleep(100);
+				// Used to save cpu-cycles
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			}
+			if (questionAnswered){
+				try {
+					Thread.sleep(1000);
+					// Waits one second before adding additional info after correct answer.
+					controller.outputText(new Message("QUIZ","INFO",currQuestion.getInfo()));
+					Thread.sleep(15000);
+					// Waits 15 seconds before loop start over and new question is being asked. 
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		controller.endQuiz();
+		// When quiz is done - end quiz from controller.
 	}
 
+	/**
+	 * Checks if the submitted answer is equal to the correct one and returns result as boolean. Makes sure only the first user answering correct gets 
+	 * a positive result.
+	 * @param answer
+	 * @return
+	 */
 	public synchronized boolean checkAnswer(String answer) {
 		boolean result = false;
 		if (!questionAnswered) {
@@ -70,12 +81,10 @@ public class Quiz implements Runnable {
 	
 	// INTERNAL METHODS
 
-	private void newQuestion() {
-		questionAnswered = false;
-		getRandom();
-		controller.outputText(new Message("QUIZ","QUESTION",currQuestion.getQuestion()));
-	}
-
+	/**
+	 * Builds questions list from file.
+	 * @param file
+	 */
 	private void makeQuestionsList(String file) {
 		String separator = ",@";
 		String currLine;
@@ -90,7 +99,19 @@ public class Quiz implements Runnable {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Gets a new question and outputs it.
+	 */
+	private void newQuestion() {
+		questionAnswered = false;
+		getRandom();
+		controller.outputText(new Message("QUIZ","QUESTION",currQuestion.getQuestion()));
+	}
 
+	/**
+	 * Gets a random question from the list and set it as current question. After that removes the question from the list.
+	 */
 	private void getRandom() {
 		int numQuestionsLeft = quizQuestions.size();
 		Random rand = new Random();
