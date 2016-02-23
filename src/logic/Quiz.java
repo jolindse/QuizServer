@@ -76,6 +76,7 @@ public class Quiz implements Runnable {
 				result = true;
 			}
 		}
+		System.out.println("QUIZ; Answer bool: "+result); // TEST
 		return result;
 	}
 	

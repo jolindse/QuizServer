@@ -36,8 +36,8 @@ public class Question {
 	 * @param answer
 	 * @return
 	 */
-	public boolean checkAnswer(String answer){
-		if(answer.equalsIgnoreCase(answer)){
+	public boolean checkAnswer(String currAnswer){
+		if(currAnswer.equalsIgnoreCase(answer)){
 			return true;
 		} else {
 			return false;

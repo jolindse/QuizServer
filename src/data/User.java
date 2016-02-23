@@ -22,7 +22,8 @@ public class User implements Runnable {
 	private Socket client;
 	private Controller controller;
 	private PrintWriter out;
-
+	private int score;
+	
 	/**
 	 * Initializes the instance and sets handlers and opens the output writer
 	 * @param controller
@@ -31,6 +32,7 @@ public class User implements Runnable {
 	public User(Controller controller, Socket client) {
 		this.controller = controller;
 		this.client = client;
+		score = 0;
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
@@ -85,7 +87,28 @@ public class User implements Runnable {
 	public String getName() {
 		return name;
 	}
+	
+	/**
+	 * Reset score to 0 to be called after finished quiz
+	 */
+	public void resetScore(){
+		score = 0;
+	}
 
+	/**
+	 * Adds a point to score.
+	 */
+	public void addScore(){
+		score += 1;
+	}
+	
+	/**
+	 * Returns the score.
+	 * @return
+	 */
+	public int getScore(){
+		return score;
+	}
 	
 	/**
 	 * Parses the cmd part of the incomming message from the client and calls the appropriate function in the controller.
@@ -98,7 +121,7 @@ public class User implements Runnable {
 			controller.outputText(currMessage);
 			break;
 		case "CHAT":
-			controller.outputChat(new Message(currMessage.getCmd(),name,currMessage.getOptionalData()));
+			controller.outputChat(new Message(currMessage.getCmd(),name,currMessage.getOptionalData()),this);
 			break;
 		case "CONNECT":
 			name = currMessage.getCmdData();
@@ -119,4 +142,6 @@ public class User implements Runnable {
 		}
 	}
 
+	
+	
 }

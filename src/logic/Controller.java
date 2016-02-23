@@ -107,12 +107,12 @@ public class Controller {
 	 * Chat output that checks if a quiz game is active and if thats the case checks chat message as potential answer.
 	 * @param currMessage
 	 */
-	public synchronized void outputChat(Message currMessage) {
+	public synchronized void outputChat(Message currMessage, User currUser) {
 		System.out.println("CONTROLLER; CHAT-OUTPUT; Should send chat message: "+currMessage.getSendString()); // TEST
 		setMessage(currMessage.getSendString());
 		view.output(currMessage);
 		if (quizActive) {
-			checkAnswer(currMessage);
+			checkAnswer(currMessage, currUser);
 		}
 	}
 
@@ -213,9 +213,10 @@ public class Controller {
 		// START POINTS
 	}
 
-	private void checkAnswer(Message currMessage) {
+	private void checkAnswer(Message currMessage, User currUser) {
 		if(quiz.checkAnswer(currMessage.getOptionalData())){
 			outputText(makeMessage("QUIZ", "ANSWER", "CORRECT ANSWER! "+currMessage.getCmdData()+" guessed (or knew) right!"));
+			currUser.addScore();
 		}
 	}
 	
@@ -225,5 +226,9 @@ public class Controller {
 	public void endQuiz() {
 		outputText(makeMessage("QUIZ", "ENDED", "Quiz game ended. Should be more info here."));
 		quizActive = false;
+		for (User currUser: gd.getClients()){
+			outputText(makeMessage("INFORMATION", "", currUser.getName()+" got "+currUser.getScore()+" points!"));
+			currUser.resetScore();
+		}
 	}
 }

@@ -32,13 +32,13 @@ public class GameData {
 		connectedUsers.remove(currUser);
 	}
 	
-	/* OLD SEND METHOD
-	public void sendToAll(String message){
-		for(User currUser: connectedUsers){
-			currUser.send(message);
-		}
+	/**
+	 * Returns the list of currently connected users
+	 * @return
+	 */
+	public List<User> getClients(){
+		return connectedUsers;
 	}
-	*/
 	
 	/**
 	 * Returns number of clients connected
