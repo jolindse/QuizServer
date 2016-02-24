@@ -8,10 +8,12 @@ import java.net.Socket;
 
 import bean.Message;
 import logic.Controller;
+
 /**
  * User/Client class
  * 
- * Each clients is an own instance of this class and by that runs in it's own thread.
+ * Each clients is an own instance of this class and by that runs in it's own
+ * thread.
  * 
  * @author Johan Lindström (jolindse@hotmail.com)
  *
@@ -23,9 +25,10 @@ public class User implements Runnable {
 	private Controller controller;
 	private PrintWriter out;
 	private int score;
-	
+
 	/**
 	 * Initializes the instance and sets handlers and opens the output writer
+	 * 
 	 * @param controller
 	 * @param client
 	 */
@@ -36,12 +39,13 @@ public class User implements Runnable {
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
-			controller.outputError(name+" problem sending to client!");
+			controller.outputError(name + " problem sending to client!");
 		}
 	}
-	
+
 	/**
 	 * Send the formatted string to client.
+	 * 
 	 * @param text
 	 */
 	public void send(String text) {
@@ -49,8 +53,9 @@ public class User implements Runnable {
 	}
 
 	/**
-	 * Socket listener thread. Handles incoming traffic from client and checks if theres a broadcast message to be delivered to 
-	 * the client. Sleeps for 100ns each run to save CPU-cycles. 
+	 * Socket listener thread. Handles incoming traffic from client and checks
+	 * if theres a broadcast message to be delivered to the client. Sleeps for
+	 * 100ns each run to save CPU-cycles.
 	 */
 	@Override
 	public void run() {
@@ -62,7 +67,6 @@ public class User implements Runnable {
 			while (true) {
 				if (in.ready()) {
 					currMessage = new Message(in.readLine());
-					System.out.println("Message recieved: "+currMessage.getSendString()); // TEST
 					parse(currMessage);
 				}
 
@@ -79,39 +83,43 @@ public class User implements Runnable {
 			controller.outputError(name + " error communicating with client!");
 		}
 	}
-	
+
 	/**
-	 *  Returns client name info.
+	 * Returns client name info.
+	 * 
 	 * @return
 	 */
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * Reset score to 0 to be called after finished quiz
 	 */
-	public void resetScore(){
+	public void resetScore() {
 		score = 0;
 	}
 
 	/**
 	 * Adds a point to score.
 	 */
-	public void addScore(){
+	public void addScore() {
 		score += 1;
 	}
-	
+
 	/**
 	 * Returns the score.
+	 * 
 	 * @return
 	 */
-	public int getScore(){
+	public int getScore() {
 		return score;
 	}
-	
+
 	/**
-	 * Parses the cmd part of the incomming message from the client and calls the appropriate function in the controller.
+	 * Parses the cmd part of the incomming message from the client and calls
+	 * the appropriate function in the controller.
+	 * 
 	 * @param currMessage
 	 */
 	private void parse(Message currMessage) {
@@ -121,7 +129,7 @@ public class User implements Runnable {
 			controller.outputText(currMessage);
 			break;
 		case "CHAT":
-			controller.outputChat(new Message(currMessage.getCmd(),name,currMessage.getOptionalData()),this);
+			controller.outputChat(new Message(currMessage.getCmd(), name, currMessage.getOptionalData()), this);
 			break;
 		case "CONNECT":
 			name = currMessage.getCmdData();
@@ -142,6 +150,4 @@ public class User implements Runnable {
 		}
 	}
 
-	
-	
 }

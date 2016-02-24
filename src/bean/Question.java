@@ -4,6 +4,7 @@ package bean;
  * Question bean
  * 
  * Stores the information on the parsed questionfile.
+ * 
  * @author Johan Lindström (jolindse@hotmail.com)
  *
  */
@@ -11,8 +12,8 @@ package bean;
 public class Question {
 
 	private String question, answer, info;
-	
-	public Question(String question, String answer, String info){
+
+	public Question(String question, String answer, String info) {
 		this.question = question;
 		this.answer = answer;
 		this.info = info;
@@ -30,19 +31,20 @@ public class Question {
 	public String getInfo() {
 		return info;
 	}
-	
+
 	/**
-	 * Checks the answer string towards the questions answer and returns boolean result.
+	 * Checks the answer string towards the questions answer and returns boolean
+	 * result.
+	 * 
 	 * @param answer
 	 * @return
 	 */
-	public boolean checkAnswer(String currAnswer){
-		if(currAnswer.equalsIgnoreCase(answer)){
+	public boolean checkAnswer(String currAnswer) {
+		if (currAnswer.equalsIgnoreCase(answer)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
-	
+
 }

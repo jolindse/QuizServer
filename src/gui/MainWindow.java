@@ -19,11 +19,12 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import logic.Controller;
+
 /**
  * Server GUI class. Simple JavaFX application that shows the GUI.
  * 
- * All methods called from controller is scheduled to run in the FX-thread by using Platform.runlater to 
- * avoid concurrency issues.
+ * All methods called from controller is scheduled to run in the FX-thread by
+ * using Platform.runlater to avoid concurrency issues.
  * 
  * @author Johan Lindström (jolindse@hotmail.com)
  *
@@ -41,7 +42,8 @@ public class MainWindow {
 		Scene scene = new Scene(rootPane, 600, 200);
 
 		/**
-		 * Initializes the list view that shows the currently connected users names.
+		 * Initializes the list view that shows the currently connected users
+		 * names.
 		 */
 		usersConnected = new ArrayList<>();
 		userListProperty = new SimpleListProperty<>();
@@ -50,20 +52,32 @@ public class MainWindow {
 		users.itemsProperty().bind(userListProperty);
 
 		/**
-		 * The start quiz button. Calls the method in controller and starts a quiz.
+		 * The start quiz button. Calls the method in controller and starts a
+		 * quiz.
 		 */
 		Button btnStart = new Button("Start quiz");
 		btnStart.setOnAction((e) -> {
 			controller.startQuiz();
 		});
-		
-		/** 
-		 * Currently unused.
+
+		/**
+		 * Stops a running quiz. Same flow as start.
 		 */
-		Button btnStop = new Button("Unused");
-		TextField fieldPort = new TextField();
+		Button btnStop = new Button("Stop quiz");
+		btnStop.setOnAction((e) -> {
+			controller.endQuiz();
+		});
+
+		TextField fieldText = new TextField();
+		Button btnSend = new Button("Send message");
+		btnSend.setOnAction((e) -> {
+			if (fieldText.getText().length() > 0) {
+				controller.outputText(new Message("CHAT", "Server", fieldText.getText()));
+			}
+		});
+
 		HBox buttonPanel = new HBox(10);
-		buttonPanel.getChildren().addAll(btnStart, fieldPort, btnStop);
+		buttonPanel.getChildren().addAll(fieldText, btnSend, btnStart, btnStop);
 
 		HBox outputPanel = new HBox();
 		outputField = new TextArea();
@@ -92,6 +106,7 @@ public class MainWindow {
 
 	/**
 	 * Adds a connected user to list view.
+	 * 
 	 * @param name
 	 */
 	public void addConnectedUser(String name) {
@@ -101,9 +116,10 @@ public class MainWindow {
 		});
 
 	}
-	
+
 	/**
 	 * Removes user from list view.
+	 * 
 	 * @param name
 	 */
 	public void removeConnectedUser(String name) {
@@ -114,7 +130,8 @@ public class MainWindow {
 	}
 
 	/**
-	 * Outputs the current message to view with "debugging" formating. 
+	 * Outputs the current message to view with "debugging" formating.
+	 * 
 	 * @param currMessage
 	 */
 	public void output(Message currMessage) {
