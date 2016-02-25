@@ -21,6 +21,7 @@ public class Quiz implements Runnable {
 	private Controller controller;
 	private List<Question> quizQuestions;
 	private Question currQuestion;
+	private int numberOfQuestions, questionCounter;
 	private boolean quizDone = false;
 	private boolean questionAnswered = false;
 	private String questionFile = "resources/QuizQuestions.txt";
@@ -28,6 +29,7 @@ public class Quiz implements Runnable {
 	public Quiz(Controller controller) {
 		this.controller = controller;
 		quizQuestions = new ArrayList<>();
+		questionCounter = 0;
 		makeQuestionsList(questionFile);
 	}
 
@@ -52,7 +54,7 @@ public class Quiz implements Runnable {
 					// Waits one second before adding additional info after
 					// correct answer.
 					controller.outputText(new Message("QUIZ", "INFO", currQuestion.getInfo()));
-					Thread.sleep(15000);
+					Thread.sleep(10000);
 					// Waits 15 seconds before loop start over and new question
 					// is being asked.
 				} catch (InterruptedException e) {
@@ -104,15 +106,21 @@ public class Quiz implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		numberOfQuestions = quizQuestions.size();
 	}
 
 	/**
 	 * Gets a new question and outputs it.
 	 */
 	private void newQuestion() {
-		questionAnswered = false;
-		getRandom();
-		controller.outputText(new Message("QUIZ", "QUESTION", currQuestion.getQuestion()));
+		questionCounter++;
+		if (questionCounter <= 10) {
+			questionAnswered = false;
+			getRandom();
+			controller.outputText(new Message("QUIZ", "QUESTION", currQuestion.getQuestion()));
+		} else {
+			quizDone = true;
+		}
 	}
 
 	/**
@@ -120,18 +128,14 @@ public class Quiz implements Runnable {
 	 * After that removes the question from the list.
 	 */
 	private void getRandom() {
-			int numQuestionsLeft = quizQuestions.size();
-			System.out.println("QUIZ; Number of questions left: " + numQuestionsLeft); // TEST
-			Random rand = new Random();
-			if (numQuestionsLeft > 0) {
-				int numberToGet = rand.nextInt(numQuestionsLeft);
-				System.out.println("QUIZ; Randomized number: " + numberToGet); // TEST
-				currQuestion = quizQuestions.get(numberToGet);
-				quizQuestions.remove(currQuestion);
-				System.out.println("QUIZ; Removed quiz. Number left in queue: " + quizQuestions.size());
-			} else {
-				quizDone = true;
-			}
+		Random rand = new Random();
+		int numberToGet = rand.nextInt(quizQuestions.size());
+		System.out.println("QUIZ; Questioncounter: " + questionCounter); // TEST
+		System.out.println("QUIZ; Randomized number: " + numberToGet); // TEST
+		currQuestion = quizQuestions.get(numberToGet);
+		quizQuestions.remove(currQuestion);
+		System.out.println("QUIZ; Removed quiz. Number left in queue: " + quizQuestions.size());
+
 	}
 
 	/**
