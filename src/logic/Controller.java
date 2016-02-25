@@ -247,5 +247,6 @@ public class Controller {
 	 */
 	public void stopQuiz() {
 		quiz.endQuiz();
+		endQuiz();
 	}
 }

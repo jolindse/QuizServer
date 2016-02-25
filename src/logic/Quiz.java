@@ -31,15 +31,16 @@ public class Quiz implements Runnable {
 		quizQuestions = new ArrayList<>();
 		questionCounter = 0;
 		makeQuestionsList(questionFile);
+		numberOfQuestions = 10;
 	}
 
 	@Override
 	public void run() {
 		while (!quizDone) {
-			newQuestion();
 			long timeStart = (System.currentTimeMillis()) + (30 * 1000);
+			// "Timer"-function. Adds 30 seconds to the current time.
+			newQuestion();
 			while (!questionAnswered && timeStart > System.currentTimeMillis()) {
-				// "Timer"-function. Adds 30 seconds to the current time.
 				try {
 					Thread.sleep(100);
 					// Used to save cpu-cycles
@@ -55,7 +56,7 @@ public class Quiz implements Runnable {
 					// correct answer.
 					controller.outputText(new Message("QUIZ", "INFO", currQuestion.getInfo()));
 					Thread.sleep(10000);
-					// Waits 15 seconds before loop start over and new question
+					// Waits 10 seconds before loop start over and new question
 					// is being asked.
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -63,8 +64,6 @@ public class Quiz implements Runnable {
 				}
 			}
 		}
-		controller.endQuiz();
-		// When quiz is done - end quiz from controller.
 	}
 
 	/**
@@ -106,7 +105,6 @@ public class Quiz implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		numberOfQuestions = quizQuestions.size();
 	}
 
 	/**
@@ -114,12 +112,15 @@ public class Quiz implements Runnable {
 	 */
 	private void newQuestion() {
 		questionCounter++;
-		if (questionCounter <= 10) {
-			questionAnswered = false;
-			getRandom();
-			controller.outputText(new Message("QUIZ", "QUESTION", currQuestion.getQuestion()));
-		} else {
+		questionAnswered = false;
+	
+		if (questionCounter == numberOfQuestions+1) {
 			quizDone = true;
+			// When quiz is done - end quiz from controller.
+			controller.endQuiz();
+		} else {
+		getRandom();
+		controller.outputText(new Message("QUIZ", "QUESTION", currQuestion.getQuestion()));
 		}
 	}
 
@@ -130,12 +131,8 @@ public class Quiz implements Runnable {
 	private void getRandom() {
 		Random rand = new Random();
 		int numberToGet = rand.nextInt(quizQuestions.size());
-		System.out.println("QUIZ; Questioncounter: " + questionCounter); // TEST
-		System.out.println("QUIZ; Randomized number: " + numberToGet); // TEST
 		currQuestion = quizQuestions.get(numberToGet);
 		quizQuestions.remove(currQuestion);
-		System.out.println("QUIZ; Removed quiz. Number left in queue: " + quizQuestions.size());
-
 	}
 
 	/**
