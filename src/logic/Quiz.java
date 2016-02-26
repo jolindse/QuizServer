@@ -55,6 +55,7 @@ public class Quiz implements Runnable {
 					// Waits one second before adding additional info after
 					// correct answer.
 					controller.outputText(new Message("QUIZ", "INFO", currQuestion.getInfo()));
+					controller.sendStatus();
 					Thread.sleep(10000);
 					// Waits 10 seconds before loop start over and new question
 					// is being asked.
@@ -121,6 +122,7 @@ public class Quiz implements Runnable {
 		} else {
 		getRandom();
 		controller.outputText(new Message("QUIZ", "QUESTION", currQuestion.getQuestion()));
+		controller.sendStatus();
 		}
 	}
 

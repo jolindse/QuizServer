@@ -241,6 +241,14 @@ public class Controller {
 			currUser.resetScore();
 		}
 	}
+	
+	public void sendStatus() {
+		String sendString = "STATUS,@"+gd.getNumClients()+",@";
+		for (User currUser: gd.getClients()){
+			sendString += currUser.getName()+"$$"+currUser.getScore();
+		}
+		setMessage(sendString);
+	}
 
 	/**
 	 * Ends a running quiz
