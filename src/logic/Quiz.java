@@ -3,6 +3,7 @@ package logic;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,7 +25,7 @@ public class Quiz implements Runnable {
 	private int numberOfQuestions, questionCounter;
 	private boolean quizDone = false;
 	private boolean questionAnswered = false;
-	private String questionFile = "resources/QuizQuestions.txt";
+	private String questionFile = "/resources/QuizQuestions.txt";
 
 	public Quiz(Controller controller) {
 		this.controller = controller;
@@ -96,7 +97,11 @@ public class Quiz implements Runnable {
 	private void makeQuestionsList(String file) {
 		String separator = ",@";
 		String currLine;
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+		
+		URL content = getClass().getResource(file);
+		controller.outputInfo("Loaded questions file: "+content.getPath());
+		
+		try (BufferedReader reader = new BufferedReader(new FileReader(content.getPath()))) {
 			while ((currLine = reader.readLine()).length() > 0) {
 				String[] split = currLine.split(separator, -1);
 				Question question = new Question(split[0], split[1], split[2]);

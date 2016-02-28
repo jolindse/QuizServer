@@ -242,10 +242,14 @@ public class Controller {
 		}
 	}
 	
+	/**
+	 * Sends the total clients status to the clients.
+	 */
 	public void sendStatus() {
+		String splitChar = ",%";
 		String sendString = "STATUS,@"+gd.getNumClients()+",@";
 		for (User currUser: gd.getClients()){
-			sendString += currUser.getName()+"$$"+currUser.getScore();
+			sendString += splitChar+currUser.getName()+splitChar+currUser.getScore();
 		}
 		setMessage(sendString);
 	}
