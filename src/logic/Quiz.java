@@ -1,9 +1,8 @@
 package logic;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -46,8 +45,7 @@ public class Quiz implements Runnable {
 					Thread.sleep(100);
 					// Used to save cpu-cycles
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					controller.outputError("Problem sending quiz-data to client");
 				}
 			}
 			if (questionAnswered) {
@@ -61,8 +59,7 @@ public class Quiz implements Runnable {
 					// Waits 10 seconds before loop start over and new question
 					// is being asked.
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					controller.outputError("Problem sending quiz-data to client");
 				}
 			}
 		}
@@ -98,18 +95,14 @@ public class Quiz implements Runnable {
 		String separator = ",@";
 		String currLine;
 		
-		URL content = getClass().getResource(file);
-		controller.outputInfo("Loaded questions file: "+content.getPath());
-		
-		try (BufferedReader reader = new BufferedReader(new FileReader(content.getPath()))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(file)))) {
 			while ((currLine = reader.readLine()).length() > 0) {
 				String[] split = currLine.split(separator, -1);
 				Question question = new Question(split[0], split[1], split[2]);
 				quizQuestions.add(question);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			controller.errorDialog("I/O error", "Problem reading questions file", "Server was unable to load the file containing questions for the quiz. Make sure file is present and properly formatted");
 		}
 	}
 

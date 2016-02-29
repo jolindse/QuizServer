@@ -2,7 +2,6 @@ package logic;
 
 import java.net.Socket;
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
 
 import bean.Message;
@@ -18,7 +17,6 @@ import gui.MainWindow;
  */
 public class Controller {
 
-	private List<User> connectedUsers;
 	private Queue<String> messageQueue;
 	private MainWindow view;
 	private GameData gd;
@@ -261,4 +259,15 @@ public class Controller {
 		quiz.endQuiz();
 		endQuiz();
 	}
+	
+	/**
+	 * Displays an error dialog in view using information provided in strings.
+	 * @param errorClass
+	 * @param errorHeader
+	 * @param errorText
+	 */
+	public void errorDialog(String errorClass, String errorHeader, String errorText) {
+		view.displayAlert(errorClass,errorHeader,errorText);
+	}
+
 }

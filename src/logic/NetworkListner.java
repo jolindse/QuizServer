@@ -31,8 +31,7 @@ public class NetworkListner extends Thread {
 				controller.userConnected(connection);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			controller.errorDialog("Communication error", "Problem establishing network connection", "Server was unable to establish a network connection. Make sure port "+PORT+" isn't in use.");
 		}
 
 	}

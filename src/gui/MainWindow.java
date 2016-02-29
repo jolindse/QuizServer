@@ -10,10 +10,12 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -31,13 +33,12 @@ import logic.Controller;
  */
 public class MainWindow {
 
-	private Controller controller;
+	private final String VERSION_NR = "1.0"; 
 	private List<String> usersConnected;
 	private ListProperty<String> userListProperty;
 	private TextArea outputField;
 
 	public MainWindow(Stage stage, Controller controller) {
-		this.controller = controller;
 		BorderPane rootPane = new BorderPane();
 		Scene scene = new Scene(rootPane, 600, 200);
 
@@ -70,6 +71,10 @@ public class MainWindow {
 
 		TextField fieldText = new TextField();
 		Button btnSend = new Button("Send message");
+		
+		/*
+		 * Sends message to all connected clients
+		 */
 		btnSend.setOnAction((e) -> {
 			if (fieldText.getText().length() > 0) {
 				controller.outputText(new Message("CHAT", "Server", fieldText.getText()));
@@ -97,7 +102,7 @@ public class MainWindow {
 			}
 		});
 
-		stage.setTitle("QuizServer v0.1");
+		stage.setTitle("QuizServer "+VERSION_NR);
 		stage.setScene(scene);
 		stage.show();
 	}
@@ -140,4 +145,20 @@ public class MainWindow {
 					+ currMessage.getOptionalData() + "\n");
 		});
 	}
+	
+	/**
+	 * Error dialog method called from controller.
+	 */
+	public void displayAlert(String errorClass, String errorHeader, String errorText){
+		Platform.runLater(() -> {
+			Alert alert = new Alert(AlertType.ERROR);
+			
+			alert.setTitle(errorClass);
+			alert.setHeaderText(errorHeader);
+			alert.setContentText(errorText);
+			
+			alert.showAndWait();
+		});
+	}
+	
 }
